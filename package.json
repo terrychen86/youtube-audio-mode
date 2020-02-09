@@ -5,5 +5,48 @@
   "repository": "https://github.com/terrychen86/youtube-audio-mode",
   "author": "Terry Chen <yenhsuan.terry@gmail.com>",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "scripts": {
+    "start": "yarn clone:static-data && yarn webpack --config ./webpack.dev.config.js --mode development --watch",
+    "build": "yarn validate && yarn clone:static-data && yarn webpack --config ./webpack.prod.config.js --mode production",
+    "clean": "rm -rf dist",
+    "validate": "yarn eslint ./src/**/*.ts",
+    "clone:static-data": "cp manifest.json hot-reload.js ./dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn validate && lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.js": [
+      "yarn prettier --write",
+      "git add"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
+    "@babel/preset-typescript": "^7.8.3",
+    "@typescript-eslint/eslint-plugin": "^2.19.0",
+    "@typescript-eslint/parser": "^2.19.0",
+    "babel-loader": "^8.0.6",
+    "babel-preset-minify": "^0.5.1",
+    "css-loader": "^3.4.2",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "file-loader": "^5.0.2",
+    "fork-ts-checker-webpack-plugin": "^4.0.3",
+    "husky": "^4.2.1",
+    "lint-staged": "^10.0.7",
+    "node-sass": "^4.13.1",
+    "prettier": "^1.19.1",
+    "sass-loader": "^8.0.2",
+    "style-loader": "^1.1.3",
+    "typescript": "^3.7.5",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  }
 }
