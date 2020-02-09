@@ -1,0 +1,19 @@
+{
+  "manifest_version": 2,
+  "name": "Youtube Audio Mode",
+  "description": "Audio-only mode on Youtube to save your internet bandwidth",
+  "version": "0.0.1",
+  "permissions": ["webRequest", "webRequestBlocking", "*://*.youtube.com/"],
+  "background": {
+    "scripts": [
+      "hot-reload.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/"],
+      "js": ["bundle.js"],
+      "run_at": "document_start"
+    }
+  ]
+}
