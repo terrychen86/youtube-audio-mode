@@ -1,0 +1,9 @@
+{
+  "name": "youtube-audio-mode",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "https://github.com/terrychen86/youtube-audio-mode",
+  "author": "Terry Chen <yenhsuan.terry@gmail.com>",
+  "license": "MIT",
+  "private": true
+}
