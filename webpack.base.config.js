@@ -2,17 +2,21 @@
 
 const webpack = require('webpack');
 const path = require('path');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const config = {
-  entry: [path.resolve(__dirname, './src/index.ts')],
+  entry: {
+    app: path.resolve(__dirname, './src/page.ts'),
+    chrome: path.resolve(__dirname, './src/chrome.ts'),
+  },
   output: {
-    filename: 'bundle.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, './dist'),
     publicPath: '/',
   },
   resolve: {
-    extensions: ['ts'],
+    extensions: ['.ts', '.js'],
   },
   module: {
     rules: [
@@ -23,7 +27,7 @@ const config = {
       },
       {
         test: /\.(sa|sc|c)ss$/,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
       },
       {
         test: /\.jpe?g$|\.ico$|\.gif$|\.png$|\.svg$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
@@ -31,7 +35,7 @@ const config = {
       },
     ],
   },
-  plugins: [new ForkTsCheckerWebpackPlugin()],
+  plugins: [new MiniCssExtractPlugin(), new ForkTsCheckerWebpackPlugin()],
 };
 
 module.exports = config;

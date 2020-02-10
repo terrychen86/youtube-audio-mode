@@ -1,0 +1,48 @@
+$yt-red: #CC0000;
+
+.html5-video-player.active {
+  &::before {
+    content: ' ';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 20;
+    background-image: url(https://i.imgur.com/E96Jmb8.png);
+    background-size: cover;
+    background-position: center;
+  }
+}
+
+.audio-mode {
+  position: relative;
+  background-size: cover;
+  background-color: black;
+  z-index: 0;
+}
+
+.audio-mode-btn-wrapper {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  background-color: white;
+}
+
+.audio-mode-btn {
+  background-color: $yt-red;
+  padding: 10px 16px;
+  min-width: 120px;
+  text-align: center;
+  margin: 0 5px;
+  color: white;
+  font-size: 14px;
+  font-family: Roboto, Noto, sans-serif;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: all linear 250ms;
+
+  &.active {
+    opacity: 1;
+  }
+}

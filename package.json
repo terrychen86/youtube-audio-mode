@@ -20,7 +20,7 @@
     }
   },
   "lint-staged": {
-    "src/**/*.js": [
+    "src/**/*.ts": [
       "yarn prettier --write",
       "git add"
     ]
@@ -29,6 +29,7 @@
     "@babel/core": "^7.8.4",
     "@babel/preset-env": "^7.8.4",
     "@babel/preset-typescript": "^7.8.3",
+    "@types/chrome": "^0.0.93",
     "@typescript-eslint/eslint-plugin": "^2.19.0",
     "@typescript-eslint/parser": "^2.19.0",
     "babel-loader": "^8.0.6",
@@ -41,12 +42,17 @@
     "fork-ts-checker-webpack-plugin": "^4.0.3",
     "husky": "^4.2.1",
     "lint-staged": "^10.0.7",
+    "mini-css-extract-plugin": "^0.9.0",
     "node-sass": "^4.13.1",
+    "optimize-css-assets-webpack-plugin": "^5.0.3",
     "prettier": "^1.19.1",
     "sass-loader": "^8.0.2",
     "style-loader": "^1.1.3",
     "typescript": "^3.7.5",
     "webpack": "^4.41.5",
     "webpack-cli": "^3.3.10"
+  },
+  "dependencies": {
+    "url": "^0.11.0"
   }
 }
