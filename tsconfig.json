@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "es2020",
     "noEmit": true
   },
   "include": [
     "src/**/*.ts"
+  ],
+  "types": [
+    "chrome",
+    "events"
   ]
 }
