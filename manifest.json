@@ -3,7 +3,7 @@
   "name": "Youtube Audio Mode",
   "description": "Audio-only mode on Youtube to save your internet bandwidth",
   "version": "0.0.1",
-  "permissions": ["tabs", "webRequest", "webRequestBlocking", "*://*.youtube.com/", "*://*.googlevideo.com/"],
+  "permissions": ["storage", "tabs", "webRequest", "webRequestBlocking", "*://*.youtube.com/", "*://*.googlevideo.com/"],
   "background": {
     "scripts": [
       "chrome.js",

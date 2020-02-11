@@ -1,28 +1,11 @@
-import url from 'url';
-import VideoRequest, { ALLOW_REQUEST, BLOCK_REQUEST } from './utils/video-request';
+import VideoRequestService from './services/video-request';
 import EVENTS from './constants/events';
 
-VideoRequest.onRequestBlock(detail => {
-  const { url: requestUrl, tabId } = detail;
-  if (requestUrl.match(/mime=audio%2Fwebm/) === null) {
-    return BLOCK_REQUEST;
-  }
+VideoRequestService.start();
 
-  const parsedRequest = url.parse(requestUrl, true);
-  const { query } = parsedRequest;
-  const filteredQuery = { ...query };
-  delete filteredQuery['range'];
-  delete filteredQuery['rbuf'];
-  delete filteredQuery['rn'];
-
-  const audioUrl: string = url.format({
-    ...parsedRequest,
-    search: undefined,
-    query: filteredQuery,
-  });
-
+VideoRequestService.onReceiveAudio(({ audioUrl, details }) => {
+  const { tabId } = details;
   chrome.tabs.sendMessage(tabId, { audioUrl });
-  return ALLOW_REQUEST;
 });
 
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
@@ -33,9 +16,9 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   try {
     const { enableAudioMode } = request;
     if (enableAudioMode) {
-      VideoRequest.block();
+      VideoRequestService.blockVideos();
     } else {
-      VideoRequest.unblock();
+      VideoRequestService.unblockVideos();
     }
 
     sendResponse({ status: 'success' });

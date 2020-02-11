@@ -8,6 +8,7 @@
     "src/**/*.ts"
   ],
   "types": [
-    "chrome"
+    "chrome",
+    "events"
   ]
 }
