@@ -1,6 +1,5 @@
 import url from 'url';
 import { EventEmitter } from 'events';
-import chromeStorage from '../utils/storage';
 import EVENTS from '../constants/events';
 
 export type WebRequestBodyDetails = chrome.webRequest.WebRequestBodyDetails;
@@ -11,27 +10,19 @@ export const BLOCK_REQUEST: BlockingResponse = { cancel: true };
 
 type Listener = (props: { audioUrl: string; details: WebRequestBodyDetails }) => void;
 
-class VideoRequestService extends EventEmitter {
+class YoutubeRequestService extends EventEmitter {
   private shouldBlockRequest: boolean;
   private isServiceActive: boolean;
 
   constructor() {
     super();
     this.init();
-    this.loadConfig();
     this.processHttpRequests();
   }
 
   private init(): void {
     this.shouldBlockRequest = false;
     this.isServiceActive = false;
-  }
-
-  private loadConfig(): void {
-    chromeStorage.get('enableAudioMode').then(data => {
-      const { enableAudioMode } = data;
-      this.shouldBlockRequest = enableAudioMode === 'true';
-    });
   }
 
   private processHttpRequests(): void {
@@ -46,7 +37,7 @@ class VideoRequestService extends EventEmitter {
           return ALLOW_REQUEST;
         }
 
-        if (initiator.match(/youtube\.com/) === null) {
+        if (initiator.match(/www\.youtube\.com/) === null) {
           return ALLOW_REQUEST;
         }
 
@@ -101,4 +92,4 @@ class VideoRequestService extends EventEmitter {
   }
 }
 
-export default new VideoRequestService();
+export default new YoutubeRequestService();

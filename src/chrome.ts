@@ -1,9 +1,9 @@
-import VideoRequestService from './services/video-request';
+import YoutubeRequestService from './services/youtube-request';
 import EVENTS from './constants/events';
 
-VideoRequestService.start();
+YoutubeRequestService.start();
 
-VideoRequestService.onReceiveAudio(({ audioUrl, details }) => {
+YoutubeRequestService.onReceiveAudio(({ audioUrl, details }) => {
   const { tabId } = details;
   chrome.tabs.sendMessage(tabId, { audioUrl });
 });
@@ -16,9 +16,9 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   try {
     const { enableAudioMode } = request;
     if (enableAudioMode) {
-      VideoRequestService.blockVideos();
+      YoutubeRequestService.blockVideos();
     } else {
-      VideoRequestService.unblockVideos();
+      YoutubeRequestService.unblockVideos();
     }
 
     sendResponse({ status: 'success' });
