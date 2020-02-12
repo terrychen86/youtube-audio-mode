@@ -90,6 +90,10 @@ class YoutubeRequestService extends EventEmitter {
   isActive(): boolean {
     return this.isServiceActive;
   }
+
+  isBlockingVideo(): boolean {
+    return this.shouldBlockRequest;
+  }
 }
 
 export default new YoutubeRequestService();

@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
       YoutubeRequestService.unblockVideos();
     }
 
-    sendResponse({ status: 'success' });
+    sendResponse({ status: 'success', enableAudioMode: YoutubeRequestService.isBlockingVideo() });
   } catch (err) {
     sendResponse({ status: 'error', err });
   }
