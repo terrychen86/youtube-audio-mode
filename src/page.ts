@@ -1,5 +1,4 @@
 import YoutubeAudioModeService from './services/youtube-audio-mode';
-import chromeStorage from './utils/storage';
 import EVENTS from './constants/events';
 import './sass/styles.scss';
 
@@ -16,8 +15,6 @@ const handleAudioModeButtonClick = (): void => {
       } else {
         YoutubeAudioModeService.stop();
       }
-
-      chromeStorage.set({ audioModeStatus: response.enableAudioMode }).then();
     },
   );
 };
@@ -26,7 +23,7 @@ const createAudioModeButton = async (): Promise<void> => {
   return new Promise<void>(resolve => {
     const audioModeButton = document.createElement('div');
     audioModeButton.classList.add('audio-mode-btn');
-    audioModeButton.textContent = 'Loading...';
+    audioModeButton.textContent = 'AUDIO MODE: OFF';
 
     const audioModeButtonWrapper = document.createElement('div');
     audioModeButtonWrapper.classList.add('audio-mode-btn-wrapper');
@@ -51,7 +48,6 @@ const createAudioModeButton = async (): Promise<void> => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const isActive = await chromeStorage.get('audioModeStatus');
     await createAudioModeButton();
 
     YoutubeAudioModeService.onStart(() => {
@@ -64,6 +60,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       const audioButton: HTMLDivElement = document.querySelector('.audio-mode-btn');
       audioButton.textContent = 'AUDIO MODE: OFF';
       audioButton.classList.remove('active');
+
+      const YTPlayer: HTMLMediaElement = document.querySelector('video.video-stream.html5-main-video');
+      const time = Math.floor(YTPlayer.currentTime);
+
+      const { pathname, search } = window.location;
+      window.location.href = `${pathname}${search}&t=${time}s`;
     });
 
     YoutubeAudioModeService.onAudioChange(audioUrl => {
@@ -72,50 +74,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const time = YTPlayer.currentTime;
       YTPlayer.src = audioUrl;
       YTPlayer.currentTime = 0;
-      YTPlayer.load();
-      YTPlayer.currentTime = time;
       YTPlayer.play();
+      YTPlayer.currentTime = time;
     });
-
-    if (isActive) {
-      YoutubeAudioModeService.start();
-    } else {
-      YoutubeAudioModeService.stop();
-    }
   } catch (err) {
     throw new Error(err);
   }
 });
-
-// const listenAudioUrl = (): void => {
-//   let currentUrl: string | null = null;
-//   chrome.runtime.onMessage.addListener(request => {
-//     if (!active) {
-//       return;
-//     }
-
-//     if (request.audioUrl) {
-//       const { audioUrl } = request;
-//       if (currentUrl === window.location.search) {
-//         return;
-//       }
-//       currentUrl = window.location.search;
-
-//       const video: HTMLMediaElement = document.querySelector('video.video-stream.html5-main-video');
-//       video.pause();
-//       video.src = audioUrl;
-//       video.currentTime = 0;
-//       video.load();
-//       video.play();
-
-//       const shouldUpdateStyles = !document.querySelector('.html5-video-player.active');
-//       if (shouldUpdateStyles) {
-//         video.classList.add('audio-mode');
-//         const videoWrapper: HTMLDivElement = document.querySelector('.html5-video-player');
-//         videoWrapper.classList.add('active');
-//       }
-//     }
-//   });
-// };
-
-// listenAudioUrl();

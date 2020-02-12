@@ -42,7 +42,7 @@ class YoutubeRequestService extends EventEmitter {
         }
 
         const { url: requestUrl } = details;
-        if (requestUrl.match(/mime=audio%2Fwebm/) === null) {
+        if (requestUrl.match(/mime=audio/) === null) {
           return this.shouldBlockRequest ? BLOCK_REQUEST : ALLOW_REQUEST;
         }
 

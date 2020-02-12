@@ -23,9 +23,8 @@ class YoutubeAudioModeService extends EventEmitter {
       if (!this.isActive) {
         return;
       }
-
-      const [el] = audioUrl.match(/\&ei=\w+\&/g);
-      const id = window.location.search + el;
+      const [ei] = audioUrl.match(/\&ei=/g);
+      const id = window.location.search + ei.substring(0, 5);
       if (this.audioId !== id) {
         this.audioId = id;
         this.emit(EVENTS.UI_RECEIVE_AUDIO_URL, audioUrl);
