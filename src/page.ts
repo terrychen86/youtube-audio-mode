@@ -2,33 +2,45 @@ import YoutubeAudioModeService from './services/youtube-audio-mode';
 import EVENTS from './constants/events';
 import './sass/styles.scss';
 
-const handleAudioModeButtonClick = (): void => {
-  chrome.runtime.sendMessage(
-    { name: EVENTS.TOGGLE_AUDIO_MODE, enableAudioMode: !YoutubeAudioModeService.isAudioModeActive() },
-    response => {
-      if (response.status !== 'success') {
-        return;
-      }
+const handleAudioModeSwitchChange = (e): void => {
+  const { checked } = e.target;
+  chrome.runtime.sendMessage({ name: EVENTS.TOGGLE_AUDIO_MODE, enableAudioMode: checked }, response => {
+    if (response.status !== 'success') {
+      return;
+    }
 
-      if (response.enableAudioMode) {
-        YoutubeAudioModeService.start();
-      } else {
-        YoutubeAudioModeService.stop();
-      }
-    },
-  );
+    if (response.enableAudioMode) {
+      YoutubeAudioModeService.start();
+    } else {
+      YoutubeAudioModeService.stop();
+    }
+  });
 };
 
-const createAudioModeButton = async (): Promise<void> => {
+const createAudioModeSwitch = async (): Promise<void> => {
   return new Promise<void>(resolve => {
-    const audioModeButton = document.createElement('div');
-    audioModeButton.classList.add('audio-mode-btn');
-    audioModeButton.textContent = 'AUDIO MODE: OFF';
+    const switchWrapper = document.createElement('label');
+    switchWrapper.classList.add('switch');
 
-    const audioModeButtonWrapper = document.createElement('div');
-    audioModeButtonWrapper.classList.add('audio-mode-btn-wrapper');
-    audioModeButtonWrapper.appendChild(audioModeButton);
-    audioModeButton.addEventListener('click', handleAudioModeButtonClick);
+    const switchInput = document.createElement('input');
+    switchInput.setAttribute('type', 'checkbox');
+    switchInput.classList.add('audio-mode-switch');
+
+    const switchPlaceholder = document.createElement('span');
+    switchPlaceholder.classList.add('slider', 'round');
+
+    switchWrapper.appendChild(switchInput);
+    switchWrapper.appendChild(switchPlaceholder);
+
+    const switchName = document.createElement('span');
+    switchName.classList.add('audio-mode-switch-name');
+    switchName.textContent = 'AUDIO MODE';
+
+    const audioModeController = document.createElement('div');
+    audioModeController.classList.add('audio-mode-controller');
+    audioModeController.appendChild(switchWrapper);
+    audioModeController.appendChild(switchName);
+    switchInput.addEventListener('change', handleAudioModeSwitchChange);
 
     const tryInsertElem = function pollingUntilSuccess(): void {
       const parentNode = document.querySelector('#top-row.style-scope.ytd-video-secondary-info-renderer');
@@ -39,7 +51,7 @@ const createAudioModeButton = async (): Promise<void> => {
       }
 
       resolve();
-      parentNode.insertBefore(audioModeButtonWrapper, refNode);
+      parentNode.insertBefore(audioModeController, refNode);
     };
 
     tryInsertElem();
@@ -48,36 +60,35 @@ const createAudioModeButton = async (): Promise<void> => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    await createAudioModeButton();
+    await createAudioModeSwitch();
 
     YoutubeAudioModeService.onStart(() => {
-      const audioButton: HTMLDivElement = document.querySelector('.audio-mode-btn');
-      audioButton.textContent = 'AUDIO MODE: ON';
-      audioButton.classList.add('active');
+      const YTPlayerContainer: HTMLMediaElement = document.querySelector('div.html5-video-player');
+      YTPlayerContainer.classList.add('active');
+
+      const YTPlayer: HTMLMediaElement = document.querySelector('video.video-stream.html5-main-video');
+      YTPlayer.preload = 'true';
     });
 
     YoutubeAudioModeService.onStop(() => {
-      const audioButton: HTMLDivElement = document.querySelector('.audio-mode-btn');
-      audioButton.textContent = 'AUDIO MODE: OFF';
-      audioButton.classList.remove('active');
+      const YTPlayerContainer: HTMLMediaElement = document.querySelector('div.html5-video-player');
+      YTPlayerContainer.classList.remove('active');
 
       const YTPlayer: HTMLMediaElement = document.querySelector('video.video-stream.html5-main-video');
       const time = Math.floor(YTPlayer.currentTime);
 
       const { pathname, search } = window.location;
-      window.location.href = `${pathname}${search}&t=${time}s`;
+      const urlParams = new URLSearchParams(search);
+      urlParams.set('t', `${time}s`);
+      window.location.href = `${pathname}?${urlParams.toString()}`;
     });
 
     YoutubeAudioModeService.onAudioChange(audioUrl => {
       const YTPlayer: HTMLMediaElement = document.querySelector('video.video-stream.html5-main-video');
-      YTPlayer.pause();
       const time = YTPlayer.currentTime;
       YTPlayer.src = audioUrl;
-      YTPlayer.currentTime = 0;
-      YTPlayer.play();
       YTPlayer.currentTime = time;
+      YTPlayer.play();
     });
-  } catch (err) {
-    throw new Error(err);
-  }
+  } catch (err) {}
 });
