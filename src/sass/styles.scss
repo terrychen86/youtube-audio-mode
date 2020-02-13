@@ -1,6 +1,8 @@
 $yt-red: #CC0000;
 
 .html5-video-player.active {
+  position: relative;
+
   &::before {
     content: ' ';
     position: absolute;
@@ -8,18 +10,21 @@ $yt-red: #CC0000;
     right: 0;
     top: 0;
     bottom: 0;
-    z-index: 20;
-    background-image: url(https://i.imgur.com/E96Jmb8.png);
-    background-size: cover;
-    background-position: center;
+    background-color: black;
+    z-index: 20
   }
-}
 
-.audio-mode {
-  position: relative;
-  background-size: cover;
-  background-color: black;
-  z-index: 0;
+  &::after {
+    content: ' ';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 128px;
+    height: 128px;
+    transform: translate(-50%, -50%);
+    background-image: url('data:image/svg+xml;base64,PHN2ZyBlbmFibGUtYmFja2dyb3VuZD0nbmV3IDAgMCA1MTIgNTEyJyBpZD0nTGF5ZXJfMScgdmVyc2lvbj0nMS4xJyB2aWV3Qm94PScwIDAgNTEyIDUxMicgeG1sOnNwYWNlPSdwcmVzZXJ2ZScgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayc+PGxpbmVhckdyYWRpZW50IGdyYWRpZW50VW5pdHM9J3VzZXJTcGFjZU9uVXNlJyBpZD0nU1ZHSURfMV8nIHgxPScyNTYnIHgyPScyNTYnIHkxPSc1MTInIHkyPSctOS4wOTQ5NDdlLTAxMyc+PHN0b3Agb2Zmc2V0PScwJyBzdHlsZT0nc3RvcC1jb2xvcjojQ0IyRDNFJy8+PHN0b3Agb2Zmc2V0PScxJyBzdHlsZT0nc3RvcC1jb2xvcjojRUY0NzNBJy8+PC9saW5lYXJHcmFkaWVudD48Y2lyY2xlIGN4PScyNTYnIGN5PScyNTYnIGZpbGw9J3VybCgjU1ZHSURfMV8pJyByPScyNTYnLz48cGF0aCBkPSdNMzUyLjYsMTYxLjNsLTExNy00MS4xYy00LjUtMS42LTkuNC0wLjktMTMuMywxLjljLTMuOSwyLjctNi4yLDcuMi02LjIsMTEuOXYxNDUuMiAgYy03LTcuMi0xNi44LTExLjYtMjcuNi0xMS42Yy0yMS40LDAtMzguOCwxNy40LTM4LjgsMzguOGMwLDIxLjQsMTcuNCwzOC44LDM4LjgsMzguOGMyMS40LDAsMzguOC0xNy40LDM4LjgtMzguOFYxMzQgIGMwLTEuNiwxLTIuNSwxLjQtMi44YzAuNC0wLjMsMS42LTEsMy4xLTAuNGwxMTcsNDEuMWMxLjQsMC41LDIuMywxLjgsMi4zLDMuMnYxNTEuNWMtNy03LjItMTYuOC0xMS42LTI3LjYtMTEuNiAgYy0yMS40LDAtMzguOCwxNy40LTM4LjgsMzguOGMwLDIxLjQsMTcuNCwzOC44LDM4LjgsMzguOGMyMS40LDAsMzguOC0xNy40LDM4LjgtMzguOFYxNzUuMUMzNjIuMywxNjguOSwzNTguNCwxNjMuMywzNTIuNiwxNjEuM3ogICBNMTg4LjUsMzM0Yy0xNS4yLDAtMjcuNi0xMi40LTI3LjYtMjcuNmMwLTE1LjIsMTIuNC0yNy42LDI3LjYtMjcuNmMxNS4yLDAsMjcuNiwxMi40LDI3LjYsMjcuNkMyMTYuMSwzMjEuNiwyMDMuNywzMzQsMTg4LjUsMzM0eiAgIE0zMjMuNSwzODEuNGMtMTUuMiwwLTI3LjYtMTIuNC0yNy42LTI3LjZjMC0xNS4yLDEyLjQtMjcuNiwyNy42LTI3LjZjMTUuMiwwLDI3LjYsMTIuNCwyNy42LDI3LjYgIEMzNTEuMSwzNjksMzM4LjcsMzgxLjQsMzIzLjUsMzgxLjR6JyBmaWxsPScjRkZGRkZGJy8+PC9zdmc+');
+    z-index: 21,
+  }
 }
 
 .audio-mode-btn-wrapper {
