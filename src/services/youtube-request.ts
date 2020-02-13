@@ -8,7 +8,7 @@ export type BlockingResponse = chrome.webRequest.BlockingResponse;
 export const ALLOW_REQUEST: BlockingResponse = { cancel: false };
 export const BLOCK_REQUEST: BlockingResponse = { cancel: true };
 
-type Listener = (props: { audioUrl: string; details: WebRequestBodyDetails }) => void;
+type Listener = (props: { audioUrl: string; details: WebRequestBodyDetails; range: string }) => void;
 
 class YoutubeRequestService extends EventEmitter {
   private shouldBlockRequest: boolean;
@@ -33,33 +33,39 @@ class YoutubeRequestService extends EventEmitter {
         }
 
         const { initiator, type } = details;
-        if (type !== 'xmlhttprequest') {
-          return ALLOW_REQUEST;
-        }
 
         if (initiator.match(/www\.youtube\.com/) === null) {
           return ALLOW_REQUEST;
         }
 
         const { url: requestUrl } = details;
-        if (requestUrl.match(/mime=audio%2Fwebm/) === null) {
+        if (type === 'media') {
+          return ALLOW_REQUEST;
+        }
+
+        if (type === 'xmlhttprequest' && requestUrl.match(/mime=audio/) === null) {
           return this.shouldBlockRequest ? BLOCK_REQUEST : ALLOW_REQUEST;
         }
 
-        const parsedRequest = url.parse(requestUrl, true);
-        const { query } = parsedRequest;
-        const filteredQuery = { ...query };
-        delete filteredQuery['range'];
-        delete filteredQuery['rbuf'];
-        delete filteredQuery['rn'];
+        if (type === 'xmlhttprequest' && requestUrl.match(/mime=audio/) !== null) {
+          const parsedRequest = url.parse(requestUrl, true);
+          const { query } = parsedRequest;
+          const { range } = query;
+          const filteredQuery = { ...query };
 
-        const audioUrl: string = url.format({
-          ...parsedRequest,
-          search: null,
-          query: filteredQuery,
-        });
+          delete filteredQuery['range'];
+          delete filteredQuery['rbuf'];
+          delete filteredQuery['rn'];
 
-        this.emit(EVENTS.RECEIVE_AUDIO_URL, { audioUrl, details });
+          const audioUrl: string = url.format({
+            ...parsedRequest,
+            search: null,
+            query: filteredQuery,
+          });
+
+          this.emit(EVENTS.RECEIVE_AUDIO_URL, { audioUrl, details, range });
+        }
+
         return ALLOW_REQUEST;
       },
       { urls: ['*://*.googlevideo.com/*'] },
@@ -68,14 +74,14 @@ class YoutubeRequestService extends EventEmitter {
   }
 
   onReceiveAudio(listener: Listener): void {
-    super.on(EVENTS.RECEIVE_AUDIO_URL, listener);
+    this.on(EVENTS.RECEIVE_AUDIO_URL, listener);
   }
 
   start(): void {
     this.isServiceActive = true;
   }
 
-  end(): void {
+  stop(): void {
     this.isServiceActive = false;
   }
 
@@ -89,6 +95,10 @@ class YoutubeRequestService extends EventEmitter {
 
   isActive(): boolean {
     return this.isServiceActive;
+  }
+
+  isBlockingVideo(): boolean {
+    return this.shouldBlockRequest;
   }
 }
 
