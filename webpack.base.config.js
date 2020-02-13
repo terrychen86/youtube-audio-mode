@@ -2,8 +2,9 @@
 
 const webpack = require('webpack');
 const path = require('path');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 const config = {
   entry: {
@@ -35,7 +36,13 @@ const config = {
       },
     ],
   },
-  plugins: [new MiniCssExtractPlugin(), new ForkTsCheckerWebpackPlugin()],
+  plugins: [
+    new MiniCssExtractPlugin(),
+    new ForkTsCheckerWebpackPlugin(),
+    new CopyPlugin([
+      { from: 'static', to: '' },
+    ]),
+  ],
 };
 
 module.exports = config;
