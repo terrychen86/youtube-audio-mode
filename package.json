@@ -7,12 +7,10 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "yarn clone:static-data && yarn webpack --config ./webpack.dev.config.js --mode development --watch",
-    "build": "yarn validate && yarn clone:static-data && yarn webpack --config ./webpack.prod.config.js --mode production",
+    "start": "yarn clean && yarn webpack --config ./webpack.dev.config.js --mode development --watch",
+    "build": "yarn clean && yarn validate && yarn webpack --config ./webpack.prod.config.js --mode production",
     "clean": "rm -rf dist",
-    "validate": "yarn eslint ./src/**/*.ts",
-    "clone:static-data": "cp manifest.json hot-reload.js ./dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "validate": "yarn eslint ./src/**/*.ts"
   },
   "husky": {
     "hooks": {
@@ -35,6 +33,7 @@
     "@typescript-eslint/parser": "^2.19.0",
     "babel-loader": "^8.0.6",
     "babel-preset-minify": "^0.5.1",
+    "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.4.2",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
