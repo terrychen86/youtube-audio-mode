@@ -5,8 +5,9 @@ type Listener = () => void;
 type AudioChangeListener = (audioUrl: string) => void;
 
 class YoutubeAudioModeService extends EventEmitter {
-  private isActive: boolean;
+  private isAudioModeActive: boolean;
   private audioId: string;
+  private rangeEnd: string;
 
   constructor() {
     super();
@@ -15,18 +16,32 @@ class YoutubeAudioModeService extends EventEmitter {
 
   private listenAudioUrlChange(): void {
     chrome.runtime.onMessage.addListener(request => {
-      const { audioUrl } = request;
+      const { audioUrl, range } = request;
       if (!audioUrl || typeof audioUrl !== 'string') {
         return;
       }
 
-      if (!this.isActive) {
+      if (!this.isAudioModeActive) {
         return;
       }
-      const [ei] = audioUrl.match(/\&ei=/g);
-      const id = window.location.search + ei.substring(0, 5);
+
+      const [ei] = audioUrl.match(/\&ei=.{10}/g);
+      const id = window.location.search + ei;
+      const rangeEnd: undefined | string = range.split('-')[1];
+
       if (this.audioId !== id) {
         this.audioId = id;
+
+        if (rangeEnd) {
+          this.rangeEnd = rangeEnd;
+        }
+
+        this.emit(EVENTS.UI_RECEIVE_AUDIO_URL, audioUrl);
+        return;
+      }
+
+      if (rangeEnd && +this.rangeEnd < +rangeEnd) {
+        this.rangeEnd = rangeEnd;
         this.emit(EVENTS.UI_RECEIVE_AUDIO_URL, audioUrl);
       }
     });
@@ -45,17 +60,17 @@ class YoutubeAudioModeService extends EventEmitter {
   }
 
   start(): void {
-    this.isActive = true;
+    this.isAudioModeActive = true;
     this.emit(EVENTS.UI_START_AUDIO_MODE);
   }
 
   stop(): void {
-    this.isActive = false;
+    this.isAudioModeActive = false;
     this.emit(EVENTS.UI_STOP_AUDIO_MODE);
   }
 
-  isAudioModeActive(): boolean {
-    return this.isActive;
+  isActive(): boolean {
+    return this.isAudioModeActive;
   }
 }
 
