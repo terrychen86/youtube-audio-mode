@@ -3,7 +3,7 @@
   "name": "Youtube Audio Mode",
   "description": "Enable Song Mode on Youtube to save internet bandwidth!",
   "version": "0.0.1",
-  "permissions": ["tabs", "webRequest", "webRequestBlocking", "*://*.youtube.com/", "*://*.googlevideo.com/"],
+  "permissions": ["tabs", "webRequest", "webRequestBlocking", "*://www.youtube.com/", "*://*.googlevideo.com/"],
   "background": {
     "scripts": [
       "chrome.js"
@@ -16,7 +16,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.youtube.com/*"],
+      "matches": ["*://www.youtube.com/*"],
       "js": ["app.js"],
       "css": ["app.css"],
       "run_at": "document_start"
