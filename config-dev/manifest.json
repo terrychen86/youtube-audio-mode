@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "Youtube Audio Mode",
+  "description": "Enable Song Mode on Youtube to save internet bandwidth!",
+  "version": "0.0.1",
+  "permissions": ["tabs", "webRequest", "webRequestBlocking", "*://*.youtube.com/", "*://*.googlevideo.com/"],
+  "background": {
+    "scripts": [
+      "chrome.js",
+      "hot-reload.js"
+    ]
+  },
+  "icons": {
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+   "128": "icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["app.js", "app.map.js"],
+      "css": ["app.css", "app.map.css"],
+      "run_at": "document_start"
+    }
+  ]
+}
