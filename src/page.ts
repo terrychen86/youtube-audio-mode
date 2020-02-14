@@ -2,9 +2,23 @@ import YoutubeAudioModeService from './services/youtube-audio-mode';
 import EVENTS from './constants/events';
 import './sass/styles.scss';
 
-const handleAudioModeSwitchChange = (e): void => {
-  const { checked } = e.target;
-  chrome.runtime.sendMessage({ name: EVENTS.TOGGLE_AUDIO_MODE, enableAudioMode: checked }, response => {
+type YoutubeRequestServiceState = {
+  enableAudioMode: boolean;
+};
+
+const requestYoutubeRequestServiceState = (): Promise<boolean> =>
+  new Promise<boolean>(resolve => {
+    chrome.runtime.sendMessage({ name: EVENTS.GET_YOUTUBE_REQUEST_SERVICE_STATE }, response => {
+      if (response.status === 'success') {
+        resolve(response.isYoutubeRequestServiceActive);
+      } else {
+        throw new Error();
+      }
+    });
+  });
+
+const updateYoutubeRequestServiceState = ({ enableAudioMode }: YoutubeRequestServiceState): void => {
+  chrome.runtime.sendMessage({ name: EVENTS.SET_YOUTUBE_REQUEST_SERVICE_STATE, enableAudioMode }, response => {
     if (response.status !== 'success') {
       return;
     }
@@ -17,8 +31,13 @@ const handleAudioModeSwitchChange = (e): void => {
   });
 };
 
-const createAudioModeSwitch = async (): Promise<void> => {
-  return new Promise<void>(resolve => {
+const handleAudioModeSwitchChange = (e): void => {
+  const { checked } = e.target;
+  updateYoutubeRequestServiceState({ enableAudioMode: checked });
+};
+
+const createAudioModeSwitch = (): Promise<void> =>
+  new Promise<void>(resolve => {
     const switchWrapper = document.createElement('label');
     switchWrapper.classList.add('switch');
 
@@ -56,6 +75,15 @@ const createAudioModeSwitch = async (): Promise<void> => {
 
     tryInsertElem();
   });
+
+const showAudioModeOverlay = (): void => {
+  const YTPlayerContainer: HTMLMediaElement = document.querySelector('div.html5-video-player');
+  YTPlayerContainer.classList.add('active');
+};
+
+const hideAudioModeOverlay = (): void => {
+  const YTPlayerContainer: HTMLMediaElement = document.querySelector('div.html5-video-player');
+  YTPlayerContainer.classList.remove('active');
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -63,23 +91,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     await createAudioModeSwitch();
 
     YoutubeAudioModeService.onStart(() => {
-      const YTPlayerContainer: HTMLMediaElement = document.querySelector('div.html5-video-player');
-      YTPlayerContainer.classList.add('active');
-
-      const YTPlayer: HTMLMediaElement = document.querySelector('video.video-stream.html5-main-video');
-      YTPlayer.preload = 'true';
+      showAudioModeOverlay();
     });
 
     YoutubeAudioModeService.onStop(() => {
-      const YTPlayerContainer: HTMLMediaElement = document.querySelector('div.html5-video-player');
-      YTPlayerContainer.classList.remove('active');
-
       const YTPlayer: HTMLMediaElement = document.querySelector('video.video-stream.html5-main-video');
       const time = Math.floor(YTPlayer.currentTime);
-
       const { pathname, search } = window.location;
       const urlParams = new URLSearchParams(search);
       urlParams.set('t', `${time}s`);
+
+      hideAudioModeOverlay();
       window.location.href = `${pathname}?${urlParams.toString()}`;
     });
 
@@ -90,5 +112,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       YTPlayer.currentTime = time;
       YTPlayer.play();
     });
+
+    const isYoutubeRequestServiceActive = await requestYoutubeRequestServiceState();
+    if (isYoutubeRequestServiceActive) {
+      updateYoutubeRequestServiceState({ enableAudioMode: false });
+    }
   } catch (err) {}
 });

@@ -1,8 +1,11 @@
 import { EventEmitter } from 'events';
-import EVENTS from '../constants/events';
 
 type Listener = () => void;
 type AudioChangeListener = (audioUrl: string) => void;
+
+const AUDIO_URL_CHANGE = 'AUDIO_URL_CHANGE';
+const START_AUDIO_MODE = 'START_AUDIO_MODE';
+const STOP_AUDIO_MODE = 'STOP_AUDIO_MODE';
 
 class YoutubeAudioModeService extends EventEmitter {
   private isAudioModeActive: boolean;
@@ -36,37 +39,37 @@ class YoutubeAudioModeService extends EventEmitter {
           this.rangeEnd = rangeEnd;
         }
 
-        this.emit(EVENTS.UI_RECEIVE_AUDIO_URL, audioUrl);
+        this.emit(AUDIO_URL_CHANGE, audioUrl);
         return;
       }
 
       if (rangeEnd && +this.rangeEnd < +rangeEnd) {
         this.rangeEnd = rangeEnd;
-        this.emit(EVENTS.UI_RECEIVE_AUDIO_URL, audioUrl);
+        this.emit(AUDIO_URL_CHANGE, audioUrl);
       }
     });
   }
 
   onAudioChange(listener: AudioChangeListener): void {
-    this.on(EVENTS.UI_RECEIVE_AUDIO_URL, listener);
+    this.on(AUDIO_URL_CHANGE, listener);
   }
 
   onStart(listener: Listener): void {
-    this.on(EVENTS.UI_START_AUDIO_MODE, listener);
+    this.on(START_AUDIO_MODE, listener);
   }
 
   onStop(listener: Listener): void {
-    this.on(EVENTS.UI_STOP_AUDIO_MODE, listener);
+    this.on(STOP_AUDIO_MODE, listener);
   }
 
   start(): void {
     this.isAudioModeActive = true;
-    this.emit(EVENTS.UI_START_AUDIO_MODE);
+    this.emit(START_AUDIO_MODE);
   }
 
   stop(): void {
     this.isAudioModeActive = false;
-    this.emit(EVENTS.UI_STOP_AUDIO_MODE);
+    this.emit(STOP_AUDIO_MODE);
   }
 
   isActive(): boolean {
