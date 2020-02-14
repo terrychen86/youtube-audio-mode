@@ -7,7 +7,7 @@ YoutubeRequestService.onReceiveAudio(({ audioUrl, details, range }) => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.name !== EVENTS.TOGGLE_AUDIO_MODE) {
+  if (request.name !== EVENTS.SET_YOUTUBE_REQUEST_SERVICE_STATE) {
     return;
   }
 
@@ -30,7 +30,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.name !== EVENTS.REQUEST_AUDIO_MODE_STATUS) {
+  if (request.name !== EVENTS.GET_YOUTUBE_REQUEST_SERVICE_STATE) {
     return;
   }
 

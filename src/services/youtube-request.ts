@@ -1,6 +1,5 @@
 import url from 'url';
 import { EventEmitter } from 'events';
-import EVENTS from '../constants/events';
 
 export type WebRequestBodyDetails = chrome.webRequest.WebRequestBodyDetails;
 export type BlockingResponse = chrome.webRequest.BlockingResponse;
@@ -10,6 +9,7 @@ export const BLOCK_REQUEST: BlockingResponse = { cancel: true };
 
 type Listener = (props: { audioUrl: string; details: WebRequestBodyDetails; range: string }) => void;
 
+const RECEIVE_AUDIO_URL = 'RECEIVE_AUDIO_URL';
 class YoutubeRequestService extends EventEmitter {
   private isServiceActive: boolean;
   private blockedTabs: Set<number>;
@@ -68,7 +68,7 @@ class YoutubeRequestService extends EventEmitter {
             query: filteredQuery,
           });
 
-          this.emit(EVENTS.RECEIVE_AUDIO_URL, { audioUrl, details, range });
+          this.emit(RECEIVE_AUDIO_URL, { audioUrl, details, range });
         }
 
         return ALLOW_REQUEST;
@@ -79,7 +79,7 @@ class YoutubeRequestService extends EventEmitter {
   }
 
   onReceiveAudio(listener: Listener): void {
-    this.on(EVENTS.RECEIVE_AUDIO_URL, listener);
+    this.on(RECEIVE_AUDIO_URL, listener);
   }
 
   start(): void {

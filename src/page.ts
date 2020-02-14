@@ -2,9 +2,13 @@ import YoutubeAudioModeService from './services/youtube-audio-mode';
 import EVENTS from './constants/events';
 import './sass/styles.scss';
 
-const requestAudioModeInitState = (): Promise<boolean> =>
+type YoutubeRequestServiceState = {
+  enableAudioMode: boolean;
+};
+
+const requestYoutubeRequestServiceState = (): Promise<boolean> =>
   new Promise<boolean>(resolve => {
-    chrome.runtime.sendMessage({ name: EVENTS.REQUEST_AUDIO_MODE_STATUS }, response => {
+    chrome.runtime.sendMessage({ name: EVENTS.GET_YOUTUBE_REQUEST_SERVICE_STATE }, response => {
       if (response.status === 'success') {
         resolve(response.isYoutubeRequestServiceActive);
       } else {
@@ -13,9 +17,8 @@ const requestAudioModeInitState = (): Promise<boolean> =>
     });
   });
 
-const handleAudioModeSwitchChange = (e): void => {
-  const { checked } = e.target;
-  chrome.runtime.sendMessage({ name: EVENTS.TOGGLE_AUDIO_MODE, enableAudioMode: checked }, response => {
+const updateYoutubeRequestServiceState = ({ enableAudioMode }: YoutubeRequestServiceState): void => {
+  chrome.runtime.sendMessage({ name: EVENTS.SET_YOUTUBE_REQUEST_SERVICE_STATE, enableAudioMode }, response => {
     if (response.status !== 'success') {
       return;
     }
@@ -28,7 +31,12 @@ const handleAudioModeSwitchChange = (e): void => {
   });
 };
 
-const createAudioModeSwitch = (isActive): Promise<void> =>
+const handleAudioModeSwitchChange = (e): void => {
+  const { checked } = e.target;
+  updateYoutubeRequestServiceState({ enableAudioMode: checked });
+};
+
+const createAudioModeSwitch = (): Promise<void> =>
   new Promise<void>(resolve => {
     const switchWrapper = document.createElement('label');
     switchWrapper.classList.add('switch');
@@ -36,10 +44,6 @@ const createAudioModeSwitch = (isActive): Promise<void> =>
     const switchInput = document.createElement('input');
     switchInput.setAttribute('type', 'checkbox');
     switchInput.classList.add('audio-mode-switch');
-
-    if (isActive) {
-      switchInput.setAttribute('checked', 'true');
-    }
 
     const switchPlaceholder = document.createElement('span');
     switchPlaceholder.classList.add('slider', 'round');
@@ -84,14 +88,7 @@ const hideAudioModeOverlay = (): void => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const isAudioModeSwitchOn = await requestAudioModeInitState();
-    await createAudioModeSwitch(isAudioModeSwitchOn);
-
-    if (isAudioModeSwitchOn) {
-      showAudioModeOverlay();
-    } else {
-      hideAudioModeOverlay();
-    }
+    await createAudioModeSwitch();
 
     YoutubeAudioModeService.onStart(() => {
       showAudioModeOverlay();
@@ -115,5 +112,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       YTPlayer.currentTime = time;
       YTPlayer.play();
     });
+
+    const isYoutubeRequestServiceActive = await requestYoutubeRequestServiceState();
+    if (isYoutubeRequestServiceActive) {
+      updateYoutubeRequestServiceState({ enableAudioMode: false });
+    }
   } catch (err) {}
 });
