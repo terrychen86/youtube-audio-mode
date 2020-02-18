@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Youtube Audio Mode",
   "description": "Enable Song Mode on Youtube to save internet bandwidth!",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "permissions": ["tabs", "webRequest", "webRequestBlocking", "*://*.youtube.com/", "*://*.googlevideo.com/"],
   "background": {
     "scripts": [
