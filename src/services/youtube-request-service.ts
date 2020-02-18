@@ -7,55 +7,43 @@ export type BlockingResponse = chrome.webRequest.BlockingResponse;
 export const ALLOW_REQUEST: BlockingResponse = { cancel: false };
 export const BLOCK_REQUEST: BlockingResponse = { cancel: true };
 
-type Listener = (props: { audioUrl: string; details: WebRequestBodyDetails; range: string }) => void;
+type Listener = (props: { audioUrl: string; tabId: number }) => void;
 
 const RECEIVE_AUDIO_URL = 'RECEIVE_AUDIO_URL';
+
 class YoutubeRequestService extends EventEmitter {
   private isServiceActive: boolean;
+  private tabAudioUrlMap: Map<number, string>;
   private blockedTabs: Set<number>;
 
   constructor() {
     super();
     this.init();
+    this.extractAudioUrl();
     this.processHttpRequests();
   }
 
   private init(): void {
     this.isServiceActive = false;
+    this.tabAudioUrlMap = new Map<number, string>();
     this.blockedTabs = new Set<number>();
   }
 
-  private processHttpRequests(): void {
+  private extractAudioUrl(): void {
     chrome.webRequest.onBeforeRequest.addListener(
       details => {
         if (!this.isServiceActive) {
-          return ALLOW_REQUEST;
+          return;
         }
 
-        const { initiator, type, tabId } = details;
-
-        if (!this.blockedTabs.has(tabId)) {
-          return ALLOW_REQUEST;
-        }
-
+        const { initiator, type, tabId, url: requestUrl } = details;
         if (initiator.match(/www\.youtube\.com/) === null) {
-          return ALLOW_REQUEST;
-        }
-
-        const { url: requestUrl } = details;
-        if (type === 'media') {
-          return ALLOW_REQUEST;
-        }
-
-        if (type === 'xmlhttprequest' && requestUrl.match(/mime=audio/) === null) {
-          this.blockedTabs.add(tabId);
-          return BLOCK_REQUEST;
+          return;
         }
 
         if (type === 'xmlhttprequest' && requestUrl.match(/mime=audio/) !== null) {
           const parsedRequest = url.parse(requestUrl, true);
           const { query } = parsedRequest;
-          const { range } = query;
           const filteredQuery = { ...query };
 
           delete filteredQuery['range'];
@@ -68,7 +56,36 @@ class YoutubeRequestService extends EventEmitter {
             query: filteredQuery,
           });
 
-          this.emit(RECEIVE_AUDIO_URL, { audioUrl, details, range });
+          if (this.tabAudioUrlMap.get(tabId) !== audioUrl) {
+            this.tabAudioUrlMap.set(tabId, audioUrl);
+            this.emit(RECEIVE_AUDIO_URL, { audioUrl, tabId });
+          }
+        }
+      },
+      { urls: ['*://*.googlevideo.com/*'] },
+    );
+  }
+
+  private processHttpRequests(): void {
+    chrome.webRequest.onBeforeRequest.addListener(
+      details => {
+        if (!this.isServiceActive) {
+          return ALLOW_REQUEST;
+        }
+
+        const { initiator, type, tabId, url: requestUrl } = details;
+
+        if (initiator.match(/www\.youtube\.com/) === null) {
+          return ALLOW_REQUEST;
+        }
+
+        if (!this.blockedTabs.has(tabId)) {
+          return ALLOW_REQUEST;
+        }
+
+        if (type === 'xmlhttprequest' && requestUrl.match(/mime=video/) !== null) {
+          this.blockedTabs.add(tabId);
+          return BLOCK_REQUEST;
         }
 
         return ALLOW_REQUEST;

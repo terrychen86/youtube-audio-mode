@@ -1,39 +1,27 @@
-import YoutubeAudioModeService from './services/youtube-audio-mode';
-import EVENTS from './constants/events';
+import YoutubeAudioModeClient from './clients/youtube-audio-mode-client';
 import './sass/styles.scss';
 
-type YoutubeRequestServiceState = {
-  enableAudioMode: boolean;
+const YTClient = new YoutubeAudioModeClient();
+
+const showAudioModeOverlay = (): void => {
+  const YTPlayerContainer: HTMLMediaElement = document.querySelector('div.html5-video-player');
+  YTPlayerContainer.classList.add('active');
 };
 
-const requestYoutubeRequestServiceState = (): Promise<boolean> =>
-  new Promise<boolean>(resolve => {
-    chrome.runtime.sendMessage({ name: EVENTS.GET_YOUTUBE_REQUEST_SERVICE_STATE }, response => {
-      if (response.status === 'success') {
-        resolve(response.isYoutubeRequestServiceActive);
-      } else {
-        throw new Error();
-      }
-    });
-  });
-
-const updateYoutubeRequestServiceState = ({ enableAudioMode }: YoutubeRequestServiceState): void => {
-  chrome.runtime.sendMessage({ name: EVENTS.SET_YOUTUBE_REQUEST_SERVICE_STATE, enableAudioMode }, response => {
-    if (response.status !== 'success') {
-      return;
-    }
-
-    if (response.enableAudioMode) {
-      YoutubeAudioModeService.start();
-    } else {
-      YoutubeAudioModeService.stop();
-    }
-  });
+const hideAudioModeOverlay = (): void => {
+  const YTPlayerContainer: HTMLMediaElement = document.querySelector('div.html5-video-player');
+  YTPlayerContainer.classList.remove('active');
 };
 
 const handleAudioModeSwitchChange = (e): void => {
   const { checked } = e.target;
-  updateYoutubeRequestServiceState({ enableAudioMode: checked });
+  if (checked) {
+    showAudioModeOverlay();
+    YTClient.startAudioMode();
+  } else {
+    hideAudioModeOverlay();
+    YTClient.stopAudioMode();
+  }
 };
 
 const createAudioModeSwitch = (): Promise<void> =>
@@ -76,46 +64,48 @@ const createAudioModeSwitch = (): Promise<void> =>
     tryInsertElem();
   });
 
-const showAudioModeOverlay = (): void => {
-  const YTPlayerContainer: HTMLMediaElement = document.querySelector('div.html5-video-player');
-  YTPlayerContainer.classList.add('active');
-};
-
-const hideAudioModeOverlay = (): void => {
-  const YTPlayerContainer: HTMLMediaElement = document.querySelector('div.html5-video-player');
-  YTPlayerContainer.classList.remove('active');
-};
-
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     await createAudioModeSwitch();
+    let pollingVideoIntervalId: null | number = null;
 
-    YoutubeAudioModeService.onStart(() => {
-      showAudioModeOverlay();
+    YTClient.onStartAudioMode(() => {
+      const YTPlayer: HTMLMediaElement = document.querySelector('video.video-stream.html5-main-video');
+      pollingVideoIntervalId = setInterval(() => {
+        const time = YTPlayer.currentTime;
+        const src = YTPlayer.src;
+
+        if (src.startsWith('blob')) {
+          YTClient.pauseAudioMode();
+        }
+
+        if (time >= 1 && src.startsWith('blob')) {
+          const isAdPlaying = !!document.querySelector('div.ad-showing');
+          if (isAdPlaying) {
+            return;
+          }
+
+          YTClient.resumeAudioMode();
+          YTPlayer.src = YTClient.getAudioUrl();
+          YTPlayer.currentTime = time;
+          YTPlayer.play();
+        }
+      }, 500);
     });
 
-    YoutubeAudioModeService.onStop(() => {
+    YTClient.onStopAudioMode(() => {
       const YTPlayer: HTMLMediaElement = document.querySelector('video.video-stream.html5-main-video');
       const time = Math.floor(YTPlayer.currentTime);
       const { pathname, search } = window.location;
       const urlParams = new URLSearchParams(search);
       urlParams.set('t', `${time}s`);
-
-      hideAudioModeOverlay();
+      clearInterval(pollingVideoIntervalId);
       window.location.href = `${pathname}?${urlParams.toString()}`;
     });
 
-    YoutubeAudioModeService.onAudioChange(audioUrl => {
-      const YTPlayer: HTMLMediaElement = document.querySelector('video.video-stream.html5-main-video');
-      const time = YTPlayer.currentTime;
-      YTPlayer.src = audioUrl;
-      YTPlayer.currentTime = time;
-      YTPlayer.play();
-    });
-
-    const isYoutubeRequestServiceActive = await requestYoutubeRequestServiceState();
+    const isYoutubeRequestServiceActive = await YTClient.getServiceState();
     if (isYoutubeRequestServiceActive) {
-      updateYoutubeRequestServiceState({ enableAudioMode: false });
+      YTClient.stopAudioMode();
     }
   } catch (err) {}
 });
