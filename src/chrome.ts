@@ -1,9 +1,8 @@
-import YoutubeRequestService from './services/youtube-request';
+import YoutubeRequestService from './services/youtube-request-service';
 import EVENTS from './constants/events';
 
-YoutubeRequestService.onReceiveAudio(({ audioUrl, details, range }) => {
-  const { tabId } = details;
-  chrome.tabs.sendMessage(tabId, { audioUrl, range });
+YoutubeRequestService.onReceiveAudio(({ audioUrl, tabId }) => {
+  chrome.tabs.sendMessage(tabId, { audioUrl });
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -12,9 +11,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   try {
-    const { enableAudioMode } = request;
+    const { blockVideoRequests } = request;
     const { id: tabId } = sender.tab;
-    if (enableAudioMode) {
+    if (blockVideoRequests) {
       YoutubeRequestService.blockVideos(tabId);
     } else {
       YoutubeRequestService.unblockVideos(tabId);
@@ -22,7 +21,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     sendResponse({
       status: 'success',
-      enableAudioMode: YoutubeRequestService.isActive() && YoutubeRequestService.isBlockingVideo(tabId),
+      blockVideoRequests: YoutubeRequestService.isActive() && YoutubeRequestService.isBlockingVideo(tabId),
     });
   } catch (err) {
     sendResponse({ status: 'error', err });

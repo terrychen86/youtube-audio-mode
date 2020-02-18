@@ -18,8 +18,8 @@
   "content_scripts": [
     {
       "matches": ["*://*.youtube.com/*"],
-      "js": ["app.js", "app.map.js"],
-      "css": ["app.css", "app.map.css"],
+      "js": ["app.js"],
+      "css": ["app.css"],
       "run_at": "document_start"
     }
   ]
