@@ -10,7 +10,7 @@ Turn on song mode to save internet bandwidth and enjoy music!
 This extension has not yet published on Chrome Web Store.
 
 The easiest way to install it is: 
-1. Download the extension [here](https://github.com/terrychen86/youtube-audio-mode/releases/tag/v0.0.1-alpha)
+1. Download the extension [here](https://github.com/terrychen86/youtube-audio-mode/releases)
 2. Go to [chrome://extensions](chrome://extensions) and check the box for `Developer mode` at the top right.
 3. Manually load the unpacked extension.
 
@@ -62,6 +62,3 @@ This project is still ongoing, so more bug fixes and improvements will come; how
 
 ## Attribution
 Check [ATTRIBUTION.md](https://github.com/terrychen86/youtube-audio-mode/blob/master/ATTRIBUTION.md)
-
-## License
-WIP...
