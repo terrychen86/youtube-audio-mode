@@ -1,7 +1,7 @@
 $yt-red: #CC0000;
 $yt-text: #606060;
 $white: #fff;
-$near-white: #ccc;
+$dark-gray: #35393b;
 $black: #000;
 
 .html5-video-player.active {
@@ -68,7 +68,7 @@ $black: #000;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: $near-white;
+  background-color: $dark-gray;
   -webkit-transition: .4s;
   transition: .4s;
 }
