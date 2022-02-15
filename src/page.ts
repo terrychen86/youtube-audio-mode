@@ -13,41 +13,66 @@ const hideAudioModeOverlay = (): void => {
   YTPlayerContainer.classList.remove('active');
 };
 
-const handleAudioModeSwitchChange = (e): void => {
-  const { checked } = e.target;
-  if (checked) {
-    showAudioModeOverlay();
-    YTClient.startAudioMode();
-  } else {
-    hideAudioModeOverlay();
-    YTClient.stopAudioMode();
-  }
-};
-
 const createAudioModeSwitch = (): Promise<void> =>
   new Promise<void>(resolve => {
-    const switchWrapper = document.createElement('label');
-    switchWrapper.classList.add('switch');
+    // create a function to set multiple attributes at once
+    function setAttributes(el, attrs) {
+      for(var key in attrs) {
+        el.setAttribute(key, attrs[key]);
+      }
+    }
 
-    const switchInput = document.createElement('input');
-    switchInput.setAttribute('type', 'checkbox');
-    switchInput.classList.add('audio-mode-switch');
+    //Create the switch button
+    const switchWrapper = document.createElement('div');
+    switchWrapper.classList.add('ytp-menuitem-content');
 
-    const switchPlaceholder = document.createElement('span');
-    switchPlaceholder.classList.add('slider', 'round');
+    const switchInput = document.createElement('div');
+    switchInput.classList.add('ytp-menuitem-toggle-checkbox');
 
     switchWrapper.appendChild(switchInput);
-    switchWrapper.appendChild(switchPlaceholder);
-
-    const switchName = document.createElement('span');
-    switchName.classList.add('audio-mode-switch-name');
-    switchName.textContent = 'AUDIO MODE';
-
+  
+    //Add the svg icon
+    const switchIconWrapper = document.createElement('div');
+    switchIconWrapper.classList.add('ytp-menuitem-icon');
+    
+    const switchIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    setAttributes(switchIcon, {"width": "24","height": "24", "viewBox": "0 0 24 24", "fill": "none"});
+  
+    //Path of svg
+    const switchIconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    setAttributes(switchIconPath,{"d": "M12 1C7.03 1 3 5.03 3 10V17C3 18.66 4.34 20 6 20H9V12H5V10C5 6.13 8.13 3 12 3C15.87 3 19 6.13 19 10V12H15V20H18C19.66 20 21 18.66 21 17V10C21 5.03 16.97 1 12 1Z", "fill": "white"});
+  
+    switchIconWrapper.appendChild(switchIcon);
+    switchIcon.appendChild(switchIconPath);
+  
+    //Add the switch label
+    const switchName = document.createElement('div');
+    switchName.classList.add('ytp-menuitem-label');
+    switchName.textContent = 'Audio mode';
+  
+    //Create item in Youtube menu
     const audioModeController = document.createElement('div');
-    audioModeController.classList.add('audio-mode-controller');
-    audioModeController.appendChild(switchWrapper);
+    audioModeController.classList.add('ytp-menuitem');
+    setAttributes(audioModeController, {"id": "audioMode", "role": "menuitemcheckbox", "aria-checked": "false", "tabindex": "0"});
+  
+    audioModeController.appendChild(switchIconWrapper);
     audioModeController.appendChild(switchName);
-    switchInput.addEventListener('change', handleAudioModeSwitchChange);
+    audioModeController.appendChild(switchWrapper);  
+  
+    //Add event listener
+    switchInput.addEventListener('click', function() {
+      const Toggle = document.getElementById('audioMode');
+      Toggle.setAttribute('aria-checked', !JSON.parse(Toggle.getAttribute('aria-checked')));
+    
+      //Check if on or off to start or stop audio mode 
+      if (JSON.parse(Toggle.getAttribute('aria-checked'))) {
+        showAudioModeOverlay();
+        YTClient.startAudioMode();
+      } else {
+        hideAudioModeOverlay();
+        YTClient.stopAudioMode();
+      }
+    });
 
     const tryInsertElem = function pollingUntilSuccess(): void {
       const parentNode = document.querySelector('#top-row.style-scope.ytd-video-secondary-info-renderer');
