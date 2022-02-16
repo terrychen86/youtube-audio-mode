@@ -62,13 +62,14 @@ const createAudioModeSwitch = (): Promise<void> =>
     //Add event listener
     switchInput.addEventListener('click', function() {
       const Toggle = document.getElementById('audioMode');
-      Toggle.setAttribute('aria-checked', !JSON.parse(Toggle.getAttribute('aria-checked')));
     
       //Check if on or off to start or stop audio mode 
-      if (JSON.parse(Toggle.getAttribute('aria-checked'))) {
+      if (Toggle.getAttribute('aria-checked') === 'false') {
+        Toggle.setAttribute('aria-checked', 'true');
         showAudioModeOverlay();
         YTClient.startAudioMode();
       } else {
+        Toggle.setAttribute('aria-checked', 'false');
         hideAudioModeOverlay();
         YTClient.stopAudioMode();
       }
