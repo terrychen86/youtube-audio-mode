@@ -13,45 +13,71 @@ const hideAudioModeOverlay = (): void => {
   YTPlayerContainer.classList.remove('active');
 };
 
-const handleAudioModeSwitchChange = (e): void => {
-  const { checked } = e.target;
-  if (checked) {
-    showAudioModeOverlay();
-    YTClient.startAudioMode();
-  } else {
-    hideAudioModeOverlay();
-    YTClient.stopAudioMode();
-  }
-};
-
 const createAudioModeSwitch = (): Promise<void> =>
   new Promise<void>(resolve => {
-    const switchWrapper = document.createElement('label');
-    switchWrapper.classList.add('switch');
+    // create a function to set multiple attributes at once
+    function setAttributes(el, attrs) {
+      for(var key in attrs) {
+        el.setAttribute(key, attrs[key]);
+      }
+    }
 
-    const switchInput = document.createElement('input');
-    switchInput.setAttribute('type', 'checkbox');
-    switchInput.classList.add('audio-mode-switch');
+    //Create the switch button
+    const switchWrapper = document.createElement('div');
+    switchWrapper.classList.add('ytp-menuitem-content');
 
-    const switchPlaceholder = document.createElement('span');
-    switchPlaceholder.classList.add('slider', 'round');
+    const switchInput = document.createElement('div');
+    switchInput.classList.add('ytp-menuitem-toggle-checkbox');
 
     switchWrapper.appendChild(switchInput);
-    switchWrapper.appendChild(switchPlaceholder);
-
-    const switchName = document.createElement('span');
-    switchName.classList.add('audio-mode-switch-name');
-    switchName.textContent = 'AUDIO MODE';
-
+  
+    //Add the svg icon
+    const switchIconWrapper = document.createElement('div');
+    switchIconWrapper.classList.add('ytp-menuitem-icon');
+    
+    const switchIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    setAttributes(switchIcon, {"width": "24","height": "24", "viewBox": "0 0 24 24", "fill": "none"});
+  
+    //Path of svg
+    const switchIconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    setAttributes(switchIconPath,{"d": "M8.075 20h-2.45q-.7 0-1.162-.462Q4 19.075 4 18.375V12q0-1.675.625-3.125t1.713-2.537Q7.425 5.25 8.875 4.625T12 4q1.675 0 3.125.625t2.538 1.713q1.087 1.087 1.712 2.537T20 12v6.375q0 .7-.462 1.163-.463.462-1.163.462h-2.45v-6.15H19V12q0-2.925-2.038-4.963Q14.925 5 12 5T7.038 7.037Q5 9.075 5 12v1.85h3.075Z", "fill": "white"});
+  
+    switchIconWrapper.appendChild(switchIcon);
+    switchIcon.appendChild(switchIconPath);
+  
+    //Add the switch label
+    const switchName = document.createElement('div');
+    switchName.classList.add('ytp-menuitem-label');
+    switchName.textContent = 'Audio mode';
+  
+    //Create item in Youtube menu
     const audioModeController = document.createElement('div');
-    audioModeController.classList.add('audio-mode-controller');
-    audioModeController.appendChild(switchWrapper);
+    audioModeController.classList.add('ytp-menuitem');
+    setAttributes(audioModeController, {"id": "audioMode", "role": "menuitemcheckbox", "aria-checked": "false", "tabindex": "0"});
+  
+    audioModeController.appendChild(switchIconWrapper);
     audioModeController.appendChild(switchName);
-    switchInput.addEventListener('change', handleAudioModeSwitchChange);
+    audioModeController.appendChild(switchWrapper);  
+  
+    //Add event listener
+    switchInput.addEventListener('click', function() {
+      const Toggle = document.getElementById('audioMode');
+    
+      //Check if on or off to start or stop audio mode 
+      if (Toggle.getAttribute('aria-checked') === 'false') {
+        Toggle.setAttribute('aria-checked', 'true');
+        showAudioModeOverlay();
+        YTClient.startAudioMode();
+      } else {
+        Toggle.setAttribute('aria-checked', 'false');
+        hideAudioModeOverlay();
+        YTClient.stopAudioMode();
+      }
+    });
 
     const tryInsertElem = function pollingUntilSuccess(): void {
-      const parentNode = document.querySelector('#top-row.style-scope.ytd-video-secondary-info-renderer');
-      const refNode = document.querySelector('#subscribe-button.style-scope.ytd-video-secondary-info-renderer');
+      const parentNode = document.querySelector('#ytp-id-18 > div.ytp-panel > div.ytp-panel-menu');
+      const refNode = document.querySelector('#ytp-id-18 > div.ytp-panel > div.ytp-panel-menu > div');
       if (!parentNode?.children?.length || !refNode) {
         requestAnimationFrame(() => tryInsertElem());
         return;
