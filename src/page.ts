@@ -40,7 +40,7 @@ const createAudioModeSwitch = (): Promise<void> =>
   
     //Path of svg
     const switchIconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    setAttributes(switchIconPath,{"d": "M12 1C7.03 1 3 5.03 3 10V17C3 18.66 4.34 20 6 20H9V12H5V10C5 6.13 8.13 3 12 3C15.87 3 19 6.13 19 10V12H15V20H18C19.66 20 21 18.66 21 17V10C21 5.03 16.97 1 12 1Z", "fill": "white"});
+    setAttributes(switchIconPath,{"d": "M8.075 20h-2.45q-.7 0-1.162-.462Q4 19.075 4 18.375V12q0-1.675.625-3.125t1.713-2.537Q7.425 5.25 8.875 4.625T12 4q1.675 0 3.125.625t2.538 1.713q1.087 1.087 1.712 2.537T20 12v6.375q0 .7-.462 1.163-.463.462-1.163.462h-2.45v-6.15H19V12q0-2.925-2.038-4.963Q14.925 5 12 5T7.038 7.037Q5 9.075 5 12v1.85h3.075Z", "fill": "white"});
   
     switchIconWrapper.appendChild(switchIcon);
     switchIcon.appendChild(switchIconPath);
@@ -76,8 +76,8 @@ const createAudioModeSwitch = (): Promise<void> =>
     });
 
     const tryInsertElem = function pollingUntilSuccess(): void {
-      const parentNode = document.querySelector('#top-row.style-scope.ytd-video-secondary-info-renderer');
-      const refNode = document.querySelector('#subscribe-button.style-scope.ytd-video-secondary-info-renderer');
+      const parentNode = document.querySelector('#ytp-id-18 > div.ytp-panel > div.ytp-panel-menu');
+      const refNode = document.querySelector('#ytp-id-18 > div.ytp-panel > div.ytp-panel-menu > div');
       if (!parentNode?.children?.length || !refNode) {
         requestAnimationFrame(() => tryInsertElem());
         return;
